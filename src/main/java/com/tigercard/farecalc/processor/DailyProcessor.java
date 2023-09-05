@@ -1,15 +1,13 @@
 package com.tigercard.farecalc.processor;
 
-import java.time.LocalDateTime;
-import java.util.AbstractMap;
-
-import org.apache.log4j.Logger;
-
 import com.tigercard.farecalc.model.DayEntry;
 import com.tigercard.farecalc.model.LineItemEntry;
 import com.tigercard.farecalc.model.WeekEntry;
-import com.tigercard.farecalc.model.Zone;
 import com.tigercard.farecalc.utils.FareUtils;
+import org.apache.log4j.Logger;
+
+import java.time.LocalDateTime;
+import java.util.AbstractMap;
 
 /**
  *  {@link DailyProcessor} process the daily fare entries.
@@ -54,7 +52,7 @@ public class DailyProcessor implements FareProcessor {
 		}
 
 		int accrualDaily = sharedState.dayEntries.stream()
-				.map(e-> e.getFare())
+				.map(DayEntry::getFare)
 				.reduce(0, Integer::sum);
 		
 		rollDayEntriesToWeekEntry(accrualDaily);
@@ -65,12 +63,12 @@ public class DailyProcessor implements FareProcessor {
 			if(FareUtils.zoneDiff(lineItemEntry.getFromZone(), lineItemEntry.getToZone()) >
 				FareUtils.zoneDiff(sharedState.farthestTripInADay.getKey(), sharedState.farthestTripInADay.getValue())
 			) {
-				sharedState.farthestTripInADay = 
-						new AbstractMap.SimpleEntry<Zone, Zone>(lineItemEntry.getFromZone(), lineItemEntry.getToZone());
+				sharedState.farthestTripInADay =
+						new AbstractMap.SimpleEntry<>(lineItemEntry.getFromZone(), lineItemEntry.getToZone());
 			}
 		} else {
-			sharedState.farthestTripInADay = 
-					new AbstractMap.SimpleEntry<Zone, Zone>(lineItemEntry.getFromZone(), lineItemEntry.getToZone());
+			sharedState.farthestTripInADay =
+					new AbstractMap.SimpleEntry<>(lineItemEntry.getFromZone(), lineItemEntry.getToZone());
 		}
 	}
 
@@ -88,9 +86,9 @@ public class DailyProcessor implements FareProcessor {
 						0,
 						0));
 		
-		String zones = Integer.toString(sharedState.farthestTripInADay.getKey().getZoneId()) +
+		String zones = sharedState.farthestTripInADay.getKey().getZoneId() +
 		" - " +
-		Integer.toString(sharedState.farthestTripInADay.getValue().getZoneId());
+				sharedState.farthestTripInADay.getValue().getZoneId();
 		
 		weekFareEntry.setZones(zones);
 		weekFareEntry.setFare(accrualDaily);
